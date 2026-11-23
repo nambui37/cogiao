@@ -15,12 +15,13 @@ import {
   Phone,
   ChevronRight,
   ShieldCheck,
-  Receipt
+  Receipt,
+  Smartphone
 } from 'lucide-react';
 import { api } from '../services/api';
 import ReceiptModal from '../components/ReceiptModal';
 
-export default function ParentPortal({ onOpenQR, announcements = [], currentUser }) {
+export default function ParentPortal({ onOpenQR, announcements = [], currentUser, onOpenInstallModal }) {
   const myChildren = currentUser?.children || [];
   const initialStudentId = myChildren.length > 0 ? myChildren[0].id : 1;
   const [studentId, setStudentId] = useState(initialStudentId);
@@ -69,6 +70,27 @@ export default function ParentPortal({ onOpenQR, announcements = [], currentUser
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-fade-in pb-16">
       
+      {/* Banner cài đặt App về điện thoại */}
+      {onOpenInstallModal && (
+        <div className="bg-gradient-to-r from-indigo-50 to-brand-50 border border-indigo-100 p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center shrink-0">
+              <Smartphone className="w-4 h-4" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-slate-800 truncate">Cài đặt ứng dụng về màn hình điện thoại</p>
+              <p className="text-[11px] text-slate-500">Mở nhanh sổ liên lạc, xem điểm danh & học phí 1-chạm</p>
+            </div>
+          </div>
+          <button
+            onClick={onOpenInstallModal}
+            className="px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shrink-0 transition-all cursor-pointer shadow-xs"
+          >
+            Cài Ngay
+          </button>
+        </div>
+      )}
+
       {/* Switcher for Parent's children if parent has multiple children */}
       {myChildren.length > 1 && (
         <div className="bg-emerald-50/90 border border-emerald-200 p-3 rounded-2xl flex flex-wrap items-center justify-between gap-2 text-xs">

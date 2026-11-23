@@ -23,6 +23,7 @@ export default function Navbar({
   currentUser, 
   onLogout,
   onViewLanding,
+  onOpenInstallModal,
   notifications,
   setNotifications,
   onOpenCreateAnnouncement
@@ -126,6 +127,17 @@ export default function Navbar({
                 title="Xem trang giới thiệu bên ngoài"
               >
                 <Globe className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            {/* Install PWA Mobile Button */}
+            {onOpenInstallModal && (
+              <button
+                onClick={onOpenInstallModal}
+                className="p-1.5 rounded-lg text-brand-600 hover:bg-brand-50 border border-brand-200/80 transition-colors cursor-pointer"
+                title="Cài đặt ứng dụng về điện thoại (iOS / Android)"
+              >
+                <Smartphone className="w-3.5 h-3.5" />
               </button>
             )}
 

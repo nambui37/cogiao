@@ -3,6 +3,20 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(
+      (registration) => {
+        console.log('PWA ServiceWorker registered successfully with scope:', registration.scope);
+      },
+      (error) => {
+        console.warn('PWA ServiceWorker registration failed:', error);
+      }
+    );
+  });
+}
+
 // Eliminate default browser popup alerts and confirms completely
 window.alert = (msg) => {
   window.dispatchEvent(new CustomEvent('app-toast', { 

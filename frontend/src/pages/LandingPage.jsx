@@ -23,10 +23,11 @@ import {
   Check, 
   Compass, 
   HelpCircle,
-  Sparkle
+  Sparkle,
+  Smartphone
 } from 'lucide-react';
 
-export default function LandingPage({ onOpenLogin, showToast }) {
+export default function LandingPage({ onOpenLogin, onOpenInstallModal, showToast }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [consultForm, setConsultForm] = useState({
     parent_name: '',
@@ -136,6 +137,16 @@ export default function LandingPage({ onOpenLogin, showToast }) {
               <span>Nhắn Zalo</span>
             </a>
 
+            {/* Nút Cài App về điện thoại */}
+            <button
+              onClick={onOpenInstallModal}
+              className="hidden md:flex items-center gap-1.5 text-xs font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200/70 px-2.5 py-1.5 rounded-xl transition-all cursor-pointer"
+              title="Cài đặt ứng dụng về màn hình điện thoại"
+            >
+              <Smartphone className="w-3.5 h-3.5 text-brand-600" />
+              <span>Cài App ĐT</span>
+            </button>
+
             {/* NÚT ĐĂNG NHẬP TRÊN HEADER */}
             <button
               onClick={onOpenLogin}
@@ -196,6 +207,16 @@ export default function LandingPage({ onOpenLogin, showToast }) {
               className="block w-full text-left py-2 text-sm font-bold text-slate-700 hover:text-brand-600"
             >
               Địa Chỉ & Liên Hệ
+            </button>
+            <button 
+              onClick={() => { setMobileMenuOpen(false); onOpenInstallModal?.(); }}
+              className="w-full text-left py-2 px-3 rounded-xl text-xs font-bold text-brand-700 bg-brand-50 border border-brand-100 flex items-center justify-between"
+            >
+              <span className="flex items-center gap-2">
+                <Smartphone className="w-3.5 h-3.5 text-brand-600" />
+                <span>Cài App Về ĐT (iOS / Android)</span>
+              </span>
+              <span className="text-[10px] bg-brand-600 text-white px-2 py-0.2 rounded-full font-bold">PWA</span>
             </button>
             <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
               <a 
@@ -1087,6 +1108,18 @@ export default function LandingPage({ onOpenLogin, showToast }) {
           </div>
         </div>
       </footer>
+
+      {/* Floating Install App Button for Mobile & Desktop */}
+      <button
+        onClick={onOpenInstallModal}
+        className="fixed bottom-5 left-5 z-40 bg-white/95 backdrop-blur-md text-brand-700 hover:text-brand-800 px-3.5 py-2 rounded-full shadow-lg border border-brand-200/80 flex items-center gap-2 text-xs font-bold transition-all hover:scale-105 active:scale-95 group cursor-pointer"
+        title="Thêm app Thủy English vào màn hình điện thoại"
+      >
+        <div className="w-6 h-6 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 group-hover:bg-brand-600 group-hover:text-white transition-colors">
+          <Smartphone className="w-3.5 h-3.5" />
+        </div>
+        <span>Cài App ĐT</span>
+      </button>
 
     </div>
   );

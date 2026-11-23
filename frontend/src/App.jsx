@@ -14,12 +14,14 @@ import VietQRModal from './components/VietQRModal';
 import Toast from './components/Toast';
 import ConfirmModal from './components/ConfirmModal';
 import CreateAnnouncementModal from './components/CreateAnnouncementModal';
+import InstallPwaModal from './components/InstallPwaModal';
 import { initialNotifications } from './components/NotificationDropdown';
 import { initialClasses } from './services/mockData';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
   const [viewLandingDirectly, setViewLandingDirectly] = useState(false);
 
   const [role, setRole] = useState('admin');
@@ -120,9 +122,15 @@ export default function App() {
         
         <LandingPage 
           onOpenLogin={() => setIsLoginModalOpen(true)}
+          onOpenInstallModal={() => setIsInstallModalOpen(true)}
           showToast={showToast}
           currentUser={currentUser}
           onBackToApp={() => setViewLandingDirectly(false)}
+        />
+
+        <InstallPwaModal
+          isOpen={isInstallModalOpen}
+          onClose={() => setIsInstallModalOpen(false)}
         />
 
         {isLoginModalOpen && (
@@ -166,6 +174,7 @@ export default function App() {
           currentUser={currentUser}
           onLogout={handleLogout}
           onViewLanding={() => setViewLandingDirectly(true)}
+          onOpenInstallModal={() => setIsInstallModalOpen(true)}
           notifications={notifications}
           setNotifications={setNotifications}
           onOpenCreateAnnouncement={() => setIsAnnouncementOpen(true)}
@@ -207,6 +216,7 @@ export default function App() {
               onOpenQR={handleOpenQR} 
               announcements={notifications} 
               currentUser={currentUser}
+              onOpenInstallModal={() => setIsInstallModalOpen(true)}
             />
           )}
 
@@ -240,6 +250,12 @@ export default function App() {
         onSend={handleSendAnnouncement}
         classes={initialClasses}
         showToast={showToast}
+      />
+
+      {/* PWA Install Guide Modal */}
+      <InstallPwaModal
+        isOpen={isInstallModalOpen}
+        onClose={() => setIsInstallModalOpen(false)}
       />
 
     </div>

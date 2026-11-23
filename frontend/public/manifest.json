@@ -1,0 +1,31 @@
+{
+  "name": "Thủy English - Quản Lý Lớp Học & Học Viên",
+  "short_name": "Thủy English",
+  "description": "Hệ thống quản lý lớp học, điểm danh 1-chạm, học phí VietQR và sổ liên lạc phụ huynh Thủy English",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["education", "productivity"]
+}
