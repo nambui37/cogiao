@@ -7,7 +7,7 @@ import {
   initialSettings 
 } from './mockData';
 
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? '/api' : 'https://cogiao-api.onrender.com/api');
 
 // Local storage keys for hybrid persistence
 const STORAGE_KEYS = {

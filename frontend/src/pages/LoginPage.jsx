@@ -127,7 +127,6 @@ export default function LoginPage({ onLoginSuccess, onClose, isModal = false }) 
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="block text-xs font-bold text-slate-700">Mật khẩu</label>
-                <span className="text-[11px] text-slate-400">Mặc định: 123456 (hoặc 123)</span>
               </div>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />

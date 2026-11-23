@@ -9,14 +9,30 @@ class Database {
 
     public static function getConnection(): PDO {
         if (self::$instance === null) {
-            $dbPath = __DIR__ . '/../database/app.db';
-            $isNew = !file_exists($dbPath);
-            self::$instance = new PDO("sqlite:" . $dbPath);
+            $dbHost = getenv('DB_HOST') ?: '';
+            $dbName = getenv('DB_NAME') ?: '';
+            $dbUser = getenv('DB_USER') ?: '';
+            $dbPass = getenv('DB_PASS') ?: '';
+            $dbPort = getenv('DB_PORT') ?: '3306';
+            $dbType = strtolower(getenv('DB_TYPE') ?: 'sqlite');
+
+            if (!empty($dbHost) && $dbType === 'mysql') {
+                $dsn = "mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset=utf8mb4";
+                self::$instance = new PDO($dsn, $dbUser, $dbPass);
+            } else if (!empty($dbHost) && ($dbType === 'pgsql' || $dbType === 'postgres')) {
+                $dsn = "pgsql:host={$dbHost};port={$dbPort};dbname={$dbName}";
+                self::$instance = new PDO($dsn, $dbUser, $dbPass);
+            } else {
+                $dbPath = __DIR__ . '/../database/app.db';
+                $isNew = !file_exists($dbPath);
+                self::$instance = new PDO("sqlite:" . $dbPath);
+                if ($isNew) {
+                    self::initSQLiteSchema(self::$instance);
+                }
+            }
+
             self::$instance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             self::$instance->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
-            // Recreate schema if needed
-            self::initSQLiteSchema(self::$instance);
         }
         return self::$instance;
     }
