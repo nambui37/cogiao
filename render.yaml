@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: cogiao-api
+    runtime: docker
+    plan: free
+    region: singapore
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cogiao-db
+          property: connectionString
+
+databases:
+  - name: cogiao-db
+    plan: free
+    region: singapore
+    databaseName: cogiao
+    user: cogiao_user

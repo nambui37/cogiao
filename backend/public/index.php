@@ -21,6 +21,14 @@ spl_autoload_register(function ($class) {
         require_once $file;
         return;
     }
+    // Check config/
+    if (strpos($class, 'Config\\') === 0) {
+        $cfgFile = __DIR__ . '/../config/' . substr($class, 7) . '.php';
+        if (file_exists($cfgFile)) {
+            require_once $cfgFile;
+            return;
+        }
+    }
     $configFile = __DIR__ . '/../' . str_replace('\\', '/', $class) . '.php';
     if (file_exists($configFile)) {
         require_once $configFile;
