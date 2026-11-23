@@ -60,6 +60,7 @@ try {
                 'status' => 'ok',
                 'message' => 'Thủy English API is online 24/7',
                 'database' => $dbType,
+                'cloud_db_debug' => \Config\Database::$cloudDbError,
                 'time' => date('Y-m-d H:i:s')
             ]);
         } catch (\Throwable $ex) {

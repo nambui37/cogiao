@@ -6,6 +6,7 @@ use PDOException;
 
 class Database {
     private static ?PDO $instance = null;
+    public static ?string $cloudDbError = null;
 
     public static function getConnection(): PDO {
         if (self::$instance === null) {
@@ -41,13 +42,23 @@ class Database {
                 try {
                     if ($dbType === 'pgsql' || $dbType === 'postgres') {
                         $port = !empty($dbPort) ? $dbPort : '5432';
-                        // sslmode: prefer or require
-                        $dsn = "pgsql:host={$dbHost};port={$port};dbname={$dbName};sslmode=prefer";
-                        self::$instance = new PDO($dsn, $dbUser, $dbPass, [
-                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                            PDO::ATTR_TIMEOUT => 8
-                        ]);
+                        // Try standard internal connection first
+                        $dsn = "pgsql:host={$dbHost};port={$port};dbname={$dbName}";
+                        try {
+                            self::$instance = new PDO($dsn, $dbUser, $dbPass, [
+                                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                                PDO::ATTR_TIMEOUT => 8
+                            ]);
+                        } catch (\Throwable $err1) {
+                            // Try with sslmode=prefer or require
+                            $dsnSsl = "pgsql:host={$dbHost};port={$port};dbname={$dbName};sslmode=prefer";
+                            self::$instance = new PDO($dsnSsl, $dbUser, $dbPass, [
+                                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                                PDO::ATTR_TIMEOUT => 8
+                            ]);
+                        }
                         self::checkAndMigratePgSQL(self::$instance);
                     } else {
                         // MySQL / TiDB
@@ -62,9 +73,12 @@ class Database {
                         self::checkAndMigrateMySQL(self::$instance);
                     }
                 } catch (\Throwable $e) {
+                    self::$cloudDbError = $e->getMessage();
                     error_log("[Cloud DB Connection Failed]: " . $e->getMessage() . ". Falling back to local SQLite.");
                     self::$instance = null;
                 }
+            } else {
+                self::$cloudDbError = "DATABASE_URL or DB_HOST is empty in environment variables.";
             }
 
             // 3. Fallback to Local SQLite if Cloud DB is not configured or failed
