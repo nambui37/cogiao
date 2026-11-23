@@ -99,9 +99,6 @@ export const api = {
       }
       throw new Error(json.message || 'API Error');
     } catch (err) {
-      if (url === '/auth/login' && err.message !== 'The user aborted a request.') {
-        throw err;
-      }
       return this.handleLocalPost(url, data);
     }
   },
