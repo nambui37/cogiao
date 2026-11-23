@@ -43,6 +43,25 @@ function getAuthUser(): ?array {
 }
 
 try {
+    // 0. Health check & Root Ping
+    if ($requestUri === '/' || $requestUri === '/api/health' || $requestUri === '/health') {
+        try {
+            $db = \Config\Database::getConnection();
+            $dbType = $db->getAttribute(PDO::ATTR_DRIVER_NAME);
+            Response::json([
+                'status' => 'ok',
+                'message' => 'Thủy English API is online 24/7',
+                'database' => $dbType,
+                'time' => date('Y-m-d H:i:s')
+            ]);
+        } catch (\Throwable $ex) {
+            Response::json([
+                'status' => 'degraded',
+                'message' => 'API is running but database warning: ' . $ex->getMessage()
+            ], 200);
+        }
+    }
+
     // 1. Auth routes
     if ($requestUri === '/api/auth/login' && $method === 'POST') {
         (new Controllers\AuthController())->login();
