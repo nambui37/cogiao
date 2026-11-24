@@ -95,11 +95,11 @@ export default function NotificationDropdown({ notifications, setNotifications, 
         <>
           {/* Backdrop to close */}
           <div 
-            className="fixed inset-0 z-40" 
+            className="fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-2xs sm:bg-transparent" 
             onClick={() => setIsOpen(false)}
           ></div>
 
-          <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-3xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-scale-up">
+          <div className="fixed left-3 right-3 top-14 sm:absolute sm:inset-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 bg-white rounded-3xl shadow-2xl border border-slate-100 z-50 overflow-hidden animate-scale-up">
             
             {/* Header */}
             <div className="p-4 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between">
@@ -113,14 +113,23 @@ export default function NotificationDropdown({ notifications, setNotifications, 
                 )}
               </div>
 
-              {unreadCount > 0 && (
+              <div className="flex items-center gap-2">
+                {unreadCount > 0 && (
+                  <button
+                    onClick={handleMarkAllRead}
+                    className="text-[11px] font-semibold text-brand-200 hover:text-white flex items-center gap-1 transition-colors"
+                  >
+                    <Check className="w-3 h-3" /> Đã đọc
+                  </button>
+                )}
                 <button
-                  onClick={handleMarkAllRead}
-                  className="text-[11px] font-semibold text-brand-200 hover:text-white flex items-center gap-1 transition-colors"
+                  onClick={() => setIsOpen(false)}
+                  className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition-colors sm:hidden"
+                  title="Đóng"
                 >
-                  <Check className="w-3 h-3" /> Đã đọc hết
+                  <X className="w-4 h-4" />
                 </button>
-              )}
+              </div>
             </div>
 
             {/* Filter Tabs & Quick Action */}
@@ -157,7 +166,7 @@ export default function NotificationDropdown({ notifications, setNotifications, 
             </div>
 
             {/* Notification List */}
-            <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
+            <div className="max-h-[60vh] sm:max-h-80 overflow-y-auto divide-y divide-slate-100">
               {filtered.length === 0 ? (
                 <div className="py-8 text-center text-xs text-slate-400">
                   🎉 Không có thông báo nào cần xử lý.
