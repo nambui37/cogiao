@@ -42,23 +42,39 @@ class Database {
                 try {
                     if ($dbType === 'pgsql' || $dbType === 'postgres') {
                         $port = !empty($dbPort) ? $dbPort : '5432';
-                        // Try standard internal connection first
-                        $dsn = "pgsql:host={$dbHost};port={$port};dbname={$dbName}";
-                        try {
-                            self::$instance = new PDO($dsn, $dbUser, $dbPass, [
-                                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                                PDO::ATTR_TIMEOUT => 8
-                            ]);
-                        } catch (\Throwable $err1) {
-                            // Try with sslmode=prefer or require
-                            $dsnSsl = "pgsql:host={$dbHost};port={$port};dbname={$dbName};sslmode=prefer";
-                            self::$instance = new PDO($dsnSsl, $dbUser, $dbPass, [
-                                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                                PDO::ATTR_TIMEOUT => 8
-                            ]);
+                        $hostsToTry = [$dbHost];
+                        // If Render internal host name fails because Web Service is in another region (e.g. Oregon to Singapore)
+                        if (strpos($dbHost, '.') === false && strpos($dbHost, 'dpg-') === 0) {
+                            $hostsToTry[] = $dbHost . '.singapore-postgres.render.com';
+                            $hostsToTry[] = $dbHost . '.oregon-postgres.render.com';
+                            $hostsToTry[] = $dbHost . '.frankfurt-postgres.render.com';
                         }
+
+                        $connected = false;
+                        $lastPgErr = null;
+                        foreach ($hostsToTry as $currHost) {
+                            $isExternal = (strpos($currHost, '.render.com') !== false);
+                            $sslModes = $isExternal ? ['require'] : ['prefer', 'disable'];
+                            foreach ($sslModes as $ssl) {
+                                try {
+                                    $dsn = "pgsql:host={$currHost};port={$port};dbname={$dbName};sslmode={$ssl}";
+                                    self::$instance = new PDO($dsn, $dbUser, $dbPass, [
+                                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                                        PDO::ATTR_TIMEOUT => 5
+                                    ]);
+                                    $connected = true;
+                                    break 2;
+                                } catch (\Throwable $err) {
+                                    $lastPgErr = $err;
+                                }
+                            }
+                        }
+
+                        if (!$connected && $lastPgErr) {
+                            throw $lastPgErr;
+                        }
+
                         self::checkAndMigratePgSQL(self::$instance);
                     } else {
                         // MySQL / TiDB
