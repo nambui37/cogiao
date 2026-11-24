@@ -163,6 +163,15 @@ try {
         if ($method === 'PUT' || $method === 'POST') (new Controllers\TuitionController())->updateStatus($id);
     }
 
+    // 7.1 Webhook SePay & VietQR Payment Auto-match
+    if (($requestUri === '/api/webhook/sepay' || $requestUri === '/api/webhook/payment') && $method === 'POST') {
+        (new Controllers\WebhookController())->handleSepay();
+    }
+
+    if ($requestUri === '/api/webhook/simulate' && $method === 'POST') {
+        (new Controllers\WebhookController())->handleSimulate();
+    }
+
     // 8. Materials
     if ($requestUri === '/api/admin/materials') {
         $ctrl = new Controllers\MaterialController();

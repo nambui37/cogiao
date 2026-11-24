@@ -20,7 +20,9 @@ export default function VietQRModal({ isOpen, onClose, fee, showToast }) {
 
   const handleCopyZalo = () => {
     const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(fee.final_amount);
-    const msg = `Kính gửi Phụ huynh bé ${fee.student_name},\nCô Thủy gửi thông báo học phí tháng ${fee.billing_month}:\n- Số tiền cần đóng: ${formattedAmount}\n- Số tài khoản: 0912345678 (MB Bank - NGUYEN THI THUY)\n- Nội dung chuyển khoản: ${fee.transfer_memo}\n- Quét mã VietQR nhanh tại: ${fee.qr_url}\nPhụ huynh đóng học phí trước ngày ${fee.due_date || '15 hàng tháng'} giúp cô nhé. Cảm ơn bố mẹ nhiều!`;
+    const bankAcc = fee.bank_account || '2004545655';
+    const bankOwner = fee.bank_owner || 'BUI DUC NAM';
+    const msg = `Kính gửi Phụ huynh bé ${fee.student_name},\nCô Thủy gửi thông báo học phí tháng ${fee.billing_month}:\n- Số tiền cần đóng: ${formattedAmount}\n- Số tài khoản: ${bankAcc} (MB Bank - ${bankOwner})\n- Nội dung chuyển khoản: ${fee.transfer_memo}\n- Quét mã VietQR nhanh tại: ${fee.qr_url}\nPhụ huynh đóng học phí trước ngày ${fee.due_date || '15 hàng tháng'} giúp cô nhé. Cảm ơn bố mẹ nhiều!`;
 
     navigator.clipboard.writeText(msg);
     setCopiedField('zalo');
@@ -124,9 +126,9 @@ export default function VietQRModal({ isOpen, onClose, fee, showToast }) {
                 <div className="flex items-center justify-between pb-1.5 border-b border-slate-200/60">
                   <span className="text-slate-400">Số tài khoản:</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono font-bold text-slate-800 text-xs">0912345678</span>
+                    <span className="font-mono font-bold text-slate-800 text-xs">{fee.bank_account || '2004545655'}</span>
                     <button 
-                      onClick={() => handleCopy('0912345678', 'account')}
+                      onClick={() => handleCopy(fee.bank_account || '2004545655', 'account')}
                       className="p-1 hover:bg-slate-200 rounded text-slate-400 hover:text-slate-700"
                       title="Sao chép STK"
                     >
@@ -137,7 +139,7 @@ export default function VietQRModal({ isOpen, onClose, fee, showToast }) {
 
                 <div className="flex items-center justify-between pb-1.5 border-b border-slate-200/60">
                   <span className="text-slate-400">Chủ tài khoản:</span>
-                  <span className="font-semibold text-slate-800">NGUYEN THI THUY</span>
+                  <span className="font-semibold text-slate-800">{fee.bank_owner || 'BUI DUC NAM'}</span>
                 </div>
 
                 <div className="flex items-center justify-between">

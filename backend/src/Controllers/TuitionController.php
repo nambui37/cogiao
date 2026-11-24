@@ -45,18 +45,24 @@ class TuitionController {
 
         // Bank settings
         $settings = $this->getBankSettings($db);
+        $bankName = $settings['bank_name'] ?? 'MB';
+        $bankAccount = $settings['bank_account'] ?? '2004545655';
+        $bankOwner = $settings['bank_owner'] ?? 'BUI DUC NAM';
 
         // Attach QR url to each fee
         foreach ($fees as &$fee) {
-            $memo = "HP " . $fee['student_code'] . " " . str_replace('-', '', $fee['billing_month']);
+            $memo = $fee['invoice_code'];
             $fee['qr_url'] = VietQR::generateQRUrl(
-                $settings['bank_name'] ?? 'MB',
-                $settings['bank_account'] ?? '0912345678',
+                $bankName,
+                $bankAccount,
                 $fee['final_amount'],
                 $memo,
-                $settings['bank_owner'] ?? 'NGUYEN THI THUY'
+                $bankOwner
             );
             $fee['transfer_memo'] = $memo;
+            $fee['bank_name'] = $bankName;
+            $fee['bank_account'] = $bankAccount;
+            $fee['bank_owner'] = $bankOwner;
         }
 
         Response::success([

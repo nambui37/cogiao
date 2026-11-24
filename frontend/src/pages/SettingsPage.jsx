@@ -22,8 +22,8 @@ export default function SettingsPage({ showToast }) {
   // Settings for Bank & Center
   const [settings, setSettings] = useState({
     bank_name: 'MB',
-    bank_account: '0912345678',
-    bank_owner: 'NGUYEN THI THUY',
+    bank_account: '2004545655',
+    bank_owner: 'BUI DUC NAM',
     center_name: 'Thủy English Center',
     center_hotline: '0912 345 678',
     center_address: 'Số 18 Ngõ 42 Phố Vọng, Hai Bà Trưng, Hà Nội'

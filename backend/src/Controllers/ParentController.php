@@ -73,16 +73,23 @@ class ParentController {
         $stmtTuition->execute([$studentId]);
         $tuitionList = $stmtTuition->fetchAll();
 
+        $bankName = $settings['bank_name'] ?? 'MB';
+        $bankAccount = $settings['bank_account'] ?? '2004545655';
+        $bankOwner = $settings['bank_owner'] ?? 'BUI DUC NAM';
+
         foreach ($tuitionList as &$tui) {
-            $memo = "HP " . $student['student_code'] . " " . str_replace('-', '', $tui['billing_month']);
+            $memo = $tui['invoice_code'];
             $tui['qr_url'] = VietQR::generateQRUrl(
-                $settings['bank_name'] ?? 'MB',
-                $settings['bank_account'] ?? '0912345678',
+                $bankName,
+                $bankAccount,
                 $tui['final_amount'],
                 $memo,
-                $settings['bank_owner'] ?? 'NGUYEN THI THUY'
+                $bankOwner
             );
             $tui['transfer_memo'] = $memo;
+            $tui['bank_name'] = $bankName;
+            $tui['bank_account'] = $bankAccount;
+            $tui['bank_owner'] = $bankOwner;
             $tui['bank_info'] = $settings;
         }
 

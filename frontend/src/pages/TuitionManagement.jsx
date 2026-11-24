@@ -26,7 +26,8 @@ import {
   Percent,
   CheckCircle,
   Copy,
-  ChevronRight
+  ChevronRight,
+  Zap
 } from 'lucide-react';
 import { api } from '../services/api';
 import ReceiptModal from '../components/ReceiptModal';
@@ -50,6 +51,9 @@ export default function TuitionManagement({ onOpenQR, showToast, askConfirm }) {
   const [editingFee, setEditingFee] = useState(null);
   const [receiptFee, setReceiptFee] = useState(null);
   const [showReminderListModal, setShowReminderListModal] = useState(false);
+  const [showWebhookTestModal, setShowWebhookTestModal] = useState(false);
+  const [webhookTesting, setWebhookTesting] = useState(false);
+  const [testSelectedInvoice, setTestSelectedInvoice] = useState('');
 
   // Batch Form Data
   const [batchData, setBatchData] = useState({
@@ -341,6 +345,19 @@ export default function TuitionManagement({ onOpenQR, showToast, askConfirm }) {
           </button>
 
           <button
+            onClick={() => {
+              const firstUnpaid = unpaidFees[0]?.invoice_code || '';
+              setTestSelectedInvoice(firstUnpaid);
+              setShowWebhookTestModal(true);
+            }}
+            className="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
+            title="Mô phỏng biến động số dư chuyển khoản MB Bank để test gạch nợ tự động"
+          >
+            <Zap className="w-4 h-4 text-amber-300" />
+            <span>⚡ Test Webhook MB Bank</span>
+          </button>
+
+          <button
             onClick={() => setShowBatchModal(true)}
             className="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 flex items-center gap-2 transition-all"
           >
@@ -420,8 +437,8 @@ export default function TuitionManagement({ onOpenQR, showToast, askConfirm }) {
             <QrCode className="w-4 h-4 text-brand-200" />
           </div>
           <div className="mt-2">
-            <div className="text-base font-black">MB BANK - 0912345678</div>
-            <div className="text-xs text-brand-100 font-medium">NGUYEN THI THUY</div>
+            <div className="text-base font-black">MB BANK - {bankInfo.bank_account || '2004545655'}</div>
+            <div className="text-xs text-brand-100 font-medium">{bankInfo.bank_owner || 'BUI DUC NAM'}</div>
           </div>
           <div className="mt-3 pt-2.5 border-t border-white/20 flex items-center justify-between text-[11px] text-brand-100">
             <span>Cổng VietQR Napas 247</span>
@@ -1195,6 +1212,149 @@ export default function TuitionManagement({ onOpenQR, showToast, askConfirm }) {
         onClose={() => setReceiptFee(null)}
         fee={receiptFee}
       />
+
+      {/* MODAL 6: Mô Phỏng Test Webhook MB Bank (Tự động gạch nợ) */}
+      {showWebhookTestModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+          onClick={() => setShowWebhookTestModal(false)}
+        >
+          <div 
+            className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 animate-scale-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 px-6 py-4 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-white/20 rounded-xl backdrop-blur-md">
+                  <Zap className="w-5 h-5 text-amber-300" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base">Test Webhook Gạch Nợ MB Bank</h3>
+                  <p className="text-xs text-emerald-100">STK 2004545655 • BUI DUC NAM</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowWebhookTestModal(false)}
+                className="p-1.5 rounded-full hover:bg-white/20 transition-colors text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4">
+              <div className="p-3.5 bg-emerald-50 rounded-2xl border border-emerald-100 text-xs text-emerald-800 leading-relaxed space-y-1">
+                <p className="font-bold flex items-center gap-1.5 text-emerald-900">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" /> Cơ chế tự động gạch nợ học phí:
+                </p>
+                <p>
+                  Khi phụ huynh chuyển khoản tới tài khoản MB Bank <strong>2004545655</strong>, cổng SePay/Casso sẽ bắn thông tin biến động số dư tới Webhook API. Hệ thống sẽ tự nhận diện mã hóa đơn và chuyển trạng thái sang <strong>"Đã thanh toán"</strong> ngay tức thì!
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  1. Chọn Hóa đơn cần test gạch nợ (Đang chưa đóng):
+                </label>
+                {unpaidFees.length === 0 ? (
+                  <div className="p-3 bg-slate-50 rounded-xl text-center text-xs text-slate-500">
+                    🎉 Tất cả học sinh tháng này đã đóng học phí rồi!
+                  </div>
+                ) : (
+                  <select
+                    value={testSelectedInvoice}
+                    onChange={(e) => setTestSelectedInvoice(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500 bg-white"
+                  >
+                    {unpaidFees.map((f) => (
+                      <option key={f.id} value={f.invoice_code}>
+                        {f.invoice_code} - {f.student_name} ({formatMoney(f.final_amount)})
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {testSelectedInvoice && (
+                <div className="p-3.5 bg-slate-900 text-emerald-400 font-mono text-[11px] rounded-2xl space-y-1 overflow-x-auto shadow-inner">
+                  <div className="text-slate-400 text-[10px] uppercase font-bold">// Payload giả lập MB Bank gửi tới Webhook:</div>
+                  <div>&#123;</div>
+                  <div className="pl-4">"gateway": "MBBank",</div>
+                  <div className="pl-4">"accountNumber": "2004545655",</div>
+                  <div className="pl-4">"content": "{testSelectedInvoice} BUI DUC NAM HOCPHI",</div>
+                  <div className="pl-4">"transferAmount": {unpaidFees.find(f => f.invoice_code === testSelectedInvoice)?.final_amount || 800000},</div>
+                  <div className="pl-4">"transferType": "in"</div>
+                  <div>&#125;</div>
+                </div>
+              )}
+
+              {/* Webhook Production URL */}
+              <div className="pt-2 border-t border-slate-100 text-xs space-y-1.5">
+                <span className="text-slate-500 font-medium">Đường dẫn Webhook thật dùng cho SePay.vn:</span>
+                <div className="flex items-center gap-1.5 p-2 bg-slate-100 rounded-xl text-[11px] font-mono text-slate-700">
+                  <span className="truncate flex-1">https://cogiao-api.onrender.com/api/webhook/sepay</span>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText('https://cogiao-api.onrender.com/api/webhook/sepay');
+                      if (showToast) showToast('Đã copy Webhook URL!', 'info');
+                    }}
+                    className="p-1 hover:bg-white rounded text-slate-500 hover:text-slate-800 transition-colors"
+                    title="Sao chép"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="pt-2 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setShowWebhookTestModal(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  disabled={!testSelectedInvoice || webhookTesting}
+                  onClick={async () => {
+                    const targetFee = unpaidFees.find(f => f.invoice_code === testSelectedInvoice);
+                    if (!targetFee) return;
+                    try {
+                      setWebhookTesting(true);
+                      const res = await api.post('/webhook/simulate', {
+                        invoice_code: targetFee.invoice_code,
+                        amount: targetFee.final_amount,
+                        gateway: 'MBBank'
+                      });
+                      if (res && res.success) {
+                        if (showToast) {
+                          showToast(`⚡ MB Bank đã gạch nợ thành công cho bé ${targetFee.student_name}!`, 'success', 'Tự động gạch nợ');
+                        }
+                        setShowWebhookTestModal(false);
+                        handleFilter(selectedMonth, selectedClass, statusFilter);
+                      } else {
+                        if (showToast) showToast(res.message || 'Lỗi khi gạch nợ', 'warning');
+                      }
+                    } catch (err) {
+                      if (showToast) showToast(err.message, 'error');
+                    } finally {
+                      setWebhookTesting(false);
+                    }
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/20 flex items-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  <Zap className="w-4 h-4 text-amber-300" />
+                  <span>{webhookTesting ? 'Đang xử lý...' : '🚀 Bắn Webhook Giả Lập Ngay'}</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );
